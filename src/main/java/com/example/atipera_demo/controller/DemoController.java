@@ -32,6 +32,8 @@ public class DemoController {
             UserNotFoundException, UnexpectedException {
         if (accept.equals(ACCEPT_HEADER_XML_VALUE)) {
             throw new XmlHeaderException();
+        } else if (!accept.equals(ACCEPT_HEADER_JSON_VALUE)) {
+            throw new UnexpectedException();
         }
         List<RepositoryResponse> result = service.getRepos(username);
         return new FinalResponse(result);
