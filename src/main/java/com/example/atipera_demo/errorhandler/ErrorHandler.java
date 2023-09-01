@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class ErrorHandler {
+    @ExceptionHandler(UnexpectedException.class)
+    public ResponseEntity<ErrorResponse> unexpectedErrorHandler(UnexpectedException e) {
+        return ResponseEntity
+                .status(HttpStatus.I_AM_A_TEAPOT)
+                .body(new ErrorResponse(HttpStatus.I_AM_A_TEAPOT.value(), e.getMessage()));
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> userNotFoundHandler(UserNotFoundException e) {
         return ResponseEntity
@@ -23,12 +30,5 @@ public class ErrorHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .body(new ErrorResponse(HttpStatus.NOT_ACCEPTABLE.value(), e.getMessage()));
-    }
-
-    @ExceptionHandler(UnexpectedException.class)
-    public ResponseEntity<ErrorResponse> unexpectedErrorHandler(UnexpectedException e) {
-        return ResponseEntity
-                .status(HttpStatus.I_AM_A_TEAPOT)
-                .body(new ErrorResponse(HttpStatus.I_AM_A_TEAPOT.value(), e.getMessage()));
     }
 }

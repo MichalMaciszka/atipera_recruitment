@@ -7,10 +7,11 @@ import com.example.atipera_demo.dto.github.BranchInfo;
 import com.example.atipera_demo.dto.github.RepositoryInfo;
 import com.example.atipera_demo.exception.UnexpectedException;
 import com.example.atipera_demo.exception.UserNotFoundException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -18,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-@Log
 public class GithubApiService {
     private static final String GITHUB_API_URL = "https://api.github.com";
     private final RestTemplate restTemplate = new RestTemplate();
@@ -31,7 +31,7 @@ public class GithubApiService {
             assert response.getBody() != null;
             return filterForksAndMapToResponse(response.getBody());
         } catch (HttpStatusCodeException e) {
-            if (e.getStatusCode().value() == 404) {
+            if (e.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
                 throw new UserNotFoundException();
             }
             throw new UnexpectedException();
@@ -44,12 +44,12 @@ public class GithubApiService {
         ResponseEntity<BranchInfo[]> response = restTemplate.getForEntity(requestUrl,
                 BranchInfo[].class);
         assert response.getBody() != null;
-        return Stream.of(response.getBody()).toList();
+        return Arrays.asList(response.getBody());
     }
 
     private List<RepositoryResponse> filterForksAndMapToResponse(RepositoryInfo[] infos) {
         return Stream.of(infos)
-                .filter(x -> x.getFork().equals(false))
+                .filter(x -> !x.getFork())
                 .map(this::handleOneRepository)
                 .toList();
     }
